@@ -224,21 +224,22 @@ class NSUpdate:
         reply_dict = {}
         if not dig_reply:
             return None
-        if ' CNAME ' in dig_reply[0] or '\tCNAME\t' in dig_reply[0]:
+        first_response = dig_reply[0].replace('\t', ' ')
+        if ' CNAME ' in first_response:
             logging.debug('Entry is alias - CNAME - record')
             reply_dict = {
                 'record_type': 'CNAME',
-                'record_ansr': dig_reply[0],
-                'record_last': dig_reply[0].split()[-1]
+                'record_ansr': first_response,
+                'record_last': first_response.split()[-1]
                 }
-        elif ' A ' in dig_reply[0] or '\tA\t' in dig_reply[0]:
+        elif ' A ' in first_response:
             logging.debug('Entry is forward - A - record')
             reply_dict = {
                 'record_type': 'A',
                 'record_ansr': dig_reply,
                 'record_last': [x.split()[-1] for x in dig_reply]
                 }
-        elif ' PTR ' in dig_reply[0] or '\tPTR\t' in dig_reply[0]:
+        elif ' PTR ' in first_response:
             logging.debug('Entry is reverse - PTR - record')
             reply_dict = {
                 'record_type': 'PTR',
@@ -679,7 +680,7 @@ class RNDC:
         Looks for last line of named dump file, indicating completion
         """
         end_of_file = '; Dump complete'
-        last_line = os.popen('tail -1 ' + dump_file).read().rstrip()
+        last_line = os.popen('/usr/bin/tail -1 ' + dump_file).read().rstrip()
         if last_line == end_of_file:
             return True
         return False
